@@ -30,4 +30,10 @@ class Student(object):
         return  str(self.ID) + ", " + self.Ime + ", " + self.Prezime + ", " + str(self.GodinaStudija)
         
         
-        
+
+class Index():
+    pass
+    #Jedan student ima jedan indeks
+    #Jedan indeks moze imati vise predmeta
+    #Jedan predmet ima jednu ocenu
+           

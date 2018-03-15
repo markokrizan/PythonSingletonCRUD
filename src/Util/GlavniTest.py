@@ -1,7 +1,8 @@
+from tkinter import *
 import tkinter as tk 
 #kao css za tkinter
 from tkinter import ttk
-from tkinter import *
+
 from Util.GUIUtils import Centriraj
 from Model.Projekat import Projekat
 

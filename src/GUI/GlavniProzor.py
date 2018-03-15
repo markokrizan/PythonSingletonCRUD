@@ -1,5 +1,5 @@
-import tkinter as tk
 from tkinter import *
+import tkinter as tk
 from tkinter import messagebox
 from tkinter.messagebox import *
 from tkinter import ttk
@@ -70,7 +70,7 @@ class GlavniProzor(tk.Tk):
             rowsp1 += 1
             
         # ------------------------------------------------------------
-        #Komponente pojedinacnih kartica:
+        #PAGE 1:
         
         #TREEVIEW
         self.tree = ttk.Treeview(page1, columns=("size", "modified"))
@@ -84,7 +84,7 @@ class GlavniProzor(tk.Tk):
         self.tree.heading("Prezime", text="Prezime")
         self.tree.heading("GodStud", text="GodStud")
         
-        self.tree.grid(row = 1, column = 0, columnspan = 50, rowspan = 15, sticky = 'NESW' )
+        self.tree.grid(row = 3, column = 0, columnspan = 50, rowspan = 15, sticky = 'NESW' )
         
         self.Osvezi()
         
@@ -101,17 +101,41 @@ class GlavniProzor(tk.Tk):
         obrisiBTN = Button(CRUDBar, text = "Obrisi", command = self.ObrisiStudenta)
         obrisiBTN.pack(side = LEFT, padx=1, pady=1)
         
-        CRUDBar.grid(row = 16, column = 0, columnspan = 50, rowspan = 3, sticky = 'NESW' )
         
         
+        traziBTN = Button(CRUDBar, text = "Trazi", command = lambda: self.NadjiStudenta(traziEntry.get()))
+        traziBTN.pack(side = RIGHT, padx=1, pady=1)
+        
+        traziEntry = Entry(CRUDBar)
+        traziEntry.pack(side = RIGHT, padx=1, pady=1)
+        
+        CRUDBar.grid(row = 19, column = 0, columnspan = 50, rowspan = 3, sticky = 'NESW' )
+        
+        #Sortiranje studenata *************************************************************
+        
+        SORTBar = Frame(page1)
+        
+        Label(SORTBar, text="Sortiraj po: ").pack(side = LEFT, padx=1, pady=1)
+        
+        ponudjeno = ['Ime', 'Prezime', 'Godina']
+        selektovaniStudent = StringVar()
+        selektovaniStudent.set(ponudjeno[0])
+        
+        #Unused argument? _ convention, stavio x da primetim
+        studentSortMenu = OptionMenu(SORTBar, selektovaniStudent, *ponudjeno, command = lambda x: self.SortirajStudente(selektovaniStudent.get()) )
+        studentSortMenu.pack(side = LEFT, padx=1, pady=1)
+        
+        SORTBar.grid(row = 1, column = 0, columnspan = 50, rowspan = 1, sticky = 'NESW' )
+        
+        
+        #**********************************************************************************
         
         #-------------------------------------------------------------
                 
         nb.add(page1, text = "Studenti")
         
         
-        
-        
+    
         page2 = ttk.Frame(nb)
         
         rowsp2 = 0
@@ -121,15 +145,22 @@ class GlavniProzor(tk.Tk):
             rowsp2 += 1
         
         # ------------------------------------------------------------
+        #PAGE2:
+        
         
         
         #-------------------------------------------------------------
         
-        nb.add(page2, text = "Zaposleni")
+        nb.add(page2, text = "Index")
         
         status = Label(self, text = "Ulogovani korisnik: " + self.korisnik.Ime, bd = 1, relief = SUNKEN, anchor = W)
         status.grid(row = 50, column = 0, columnspan = 50, rowspan = 48, sticky = 'NESW' )
-     
+        
+        
+        
+    
+    #********************************************************************* STUDENT **********************************************************************************
+    
       
     def Osvezi(self):
         #prvo ocisti
@@ -164,6 +195,77 @@ class GlavniProzor(tk.Tk):
         if (odgovor == 'yes'):
            UkloniStudenta(id)
            self.Osvezi() 
+           
+    def NadjiStudenta(self, query):     
+        trazeniStudenti = []
+        
+        if(query!=""):
+            for i in Projekat().studenti:
+                if(i.Obrisan != True and (query in i.Ime.lower() or query in i.Prezime.lower())):
+                    trazeniStudenti.append(i)
+            '''
+            else:
+                #tkinter.messagebox.showinfo('Greska', 'Ne postoji taj student!')
+                print("nema takvog studenta")
+            '''
+            
+            for i in self.tree.get_children():
+                self.tree.delete(i)
+            for i in trazeniStudenti:
+                self.tree.insert("", 'end' ,text = i.ID, values = (i.Ime, i.Prezime, i.GodinaStudija)) 
+            
+        else:     
+            self.Osvezi()
+            
+    
+    def SortirajStudente(self, kriterijum):
+        sortKolekcija = []
+        
+        if(kriterijum == "Ime"):
+            #sort = sorted(Projekat().studenti, key=lambda x: x.Ime.lower(), reverse = True) #za descending
+            #words that start with an uppercase letter get preference over those starting with a lowercase letter
+            sort = sorted(Projekat().studenti, key=lambda x: x.Ime.lower())
+            for i in sort:
+                if (i.Obrisan != True):
+                    sortKolekcija.append(i)
+            
+            for i in self.tree.get_children():
+                self.tree.delete(i)
+            for i in sortKolekcija:
+                self.tree.insert("", 'end' ,text = i.ID, values = (i.Ime, i.Prezime, i.GodinaStudija))
+        
+        
+        elif(kriterijum == "Prezime"):
+            sort = sorted(Projekat().studenti, key=lambda x: x.Prezime.lower())
+            for i in sort:
+                if (i.Obrisan != True):
+                    sortKolekcija.append(i)
+            
+            for i in self.tree.get_children():
+                self.tree.delete(i)
+            for i in sortKolekcija:
+                self.tree.insert("", 'end' ,text = i.ID, values = (i.Ime, i.Prezime, i.GodinaStudija))
+        
+        
+        
+        elif(kriterijum == "Godina"):
+            sort = sorted(Projekat().studenti, key=lambda x: str(x.GodinaStudija))
+            for i in sort:
+                if (i.Obrisan != True):
+                    sortKolekcija.append(i)
+            
+            for i in self.tree.get_children():
+                self.tree.delete(i)
+            for i in sortKolekcija:
+                self.tree.insert("", 'end' ,text = i.ID, values = (i.Ime, i.Prezime, i.GodinaStudija))
+        
+        
+        
+        
+        
+        
+    
+    #********************************************************************* STUDENT **********************************************************************************
         
         
         
